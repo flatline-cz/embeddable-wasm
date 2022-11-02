@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include "wa-binding.h"
 #include "../execution/instruction-trace.h"
-#include "utils.h"
+#include "wa-utils.h"
 
 
 static bool check_type_stack2binding(eWasm_value_type from, eWasm_binding_type to);

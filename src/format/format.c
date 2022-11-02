@@ -3,9 +3,9 @@
 //
 
 #include "format.h"
-#include "mem-manager.h"
+#include "wa-memory.h"
 #include "wa-types.h"
-#include "utils.h"
+#include "wa-utils.h"
 #include <stdio.h>
 #include <memory.h>
 

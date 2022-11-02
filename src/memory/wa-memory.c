@@ -1,7 +1,7 @@
 //
 // Created by tumap on 9/23/22.
 //
-#include "mem-manager.h"
+#include "wa-memory.h"
 
 #if defined(WASM_MEMORY_TRACE) && WASM_MEMORY_TRACE > 1
 #include <stdio.h>

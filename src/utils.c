@@ -2,7 +2,7 @@
 // Created by tumap on 10/21/22.
 //
 #include <stdlib.h>
-#include "utils.h"
+#include "wa-utils.h"
 
 
 bool _wasm_extract_u32(const uint8_t *data, uint16_t data_length,

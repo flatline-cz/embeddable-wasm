@@ -2,7 +2,7 @@
 // Created by tumap on 10/21/22.
 //
 #include "instruction-decoder.h"
-#include "utils.h"
+#include "wa-utils.h"
 #include "instruction-trace.h"
 
 WASM_INSTRUCTION(const_i32)

@@ -1,11 +1,11 @@
 //
 // Created by tumap on 10/24/22.
 //
-#include "interpreter.h"
-#include "mem-manager.h"
+#include "wa-system.h"
+#include "wa-memory.h"
 #include "instruction-decoder.h"
 #include "instruction-trace.h"
-#include "utils.h"
+#include "wa-utils.h"
 #include <stdio.h>
 
 #ifndef WASM_VALUE_STACK_SIZE

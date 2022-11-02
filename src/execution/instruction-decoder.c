@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include "instruction-decoder.h"
 #include "instruction-trace.h"
-#include "utils.h"
+#include "wa-utils.h"
 
 WASM_INSTRUCTION_DECL(const_i32)
 

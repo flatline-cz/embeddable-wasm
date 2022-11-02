@@ -4,7 +4,7 @@
 #include <string.h>
 #include "instruction-decoder.h"
 #include "instruction-trace.h"
-#include "utils.h"
+#include "wa-utils.h"
 
 
 WASM_INSTRUCTION(nop)

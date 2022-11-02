@@ -9,7 +9,7 @@ set(WASM_SOURCES
         ${CMAKE_CURRENT_LIST_DIR}/src/execution/instruction-logic.c
         ${CMAKE_CURRENT_LIST_DIR}/src/execution/instruction-parametric.c
         ${CMAKE_CURRENT_LIST_DIR}/src/execution/instruction-arithmetic.c
-        ${CMAKE_CURRENT_LIST_DIR}/src/mem-manager.c
+        ${CMAKE_CURRENT_LIST_DIR}/src/memory/wa-memory.c
         ${CMAKE_CURRENT_LIST_DIR}/src/utils.c
         ${CMAKE_CURRENT_LIST_DIR}/src/format/format.c
         ${CMAKE_CURRENT_LIST_DIR}/src/format/format-functions.c

@@ -5,8 +5,8 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include "wa-types.h"
-#include "utils.h"
-#include "mem-manager.h"
+#include "wa-utils.h"
+#include "wa-memory.h"
 
 
 static uint32_t signature_count;
