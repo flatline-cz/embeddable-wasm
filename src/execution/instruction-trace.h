@@ -15,7 +15,7 @@
 #if defined(WASM_EXEC_TRACE) && WASM_EXEC_TRACE == 2
 #define TRACE_INSTRUCTION(name) printf("WASM Exec:  <%s>\n", #name );
 #else
-#define TRACE_INSTRUCTION
+#define TRACE_INSTRUCTION(name)
 #endif
 
 #define WASM_INSTRUCTION(name) bool _wasm_instruction_ ## name (tWasm_context *const ctx) { \
