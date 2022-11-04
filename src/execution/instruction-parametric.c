@@ -1,7 +1,8 @@
 //
 // Created by tumap on 10/24/22.
 //
-#include <memory.h>
+//#include <memory.h>
+//#include <string.h>
 #include "instruction-decoder.h"
 #include "instruction-trace.h"
 
@@ -34,9 +35,10 @@ WASM_INSTRUCTION(select)
 
     // move element on stack
     if (ctx->value_stack.base[ctx->value_stack.top - 1].i32 == 0) {
-        memcpy(ctx->value_stack.base + ctx->value_stack.top - 2,
-               ctx->value_stack.base + ctx->value_stack.top - 1,
-               sizeof(tWasm_value));
+        // TODO:
+//        memcpy(ctx->value_stack.base + ctx->value_stack.top - 2,
+//               ctx->value_stack.base + ctx->value_stack.top - 1,
+//               sizeof(tWasm_value));
     }
 
     // update stack top

@@ -1,7 +1,6 @@
 //
 // Created by tumap on 10/21/22.
 //
-#include <string.h>
 #include "instruction-decoder.h"
 #include "instruction-trace.h"
 #include "wa-utils.h"

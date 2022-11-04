@@ -1,13 +1,11 @@
 //
 // Created by tumap on 9/23/22.
 //
-
+#include <string.h>
 #include "format.h"
 #include "wa-memory.h"
 #include "wa-types.h"
 #include "wa-utils.h"
-#include <stdio.h>
-#include <memory.h>
 
 #ifdef WASM_FORMAT_TRACE
 #define TRACE(...) printf("WASM Format:  "); printf(__VA_ARGS__); printf("\n");
@@ -38,7 +36,7 @@ bool _wasm_format_parse_section_EXPORT_function(
         const char *name, uint8_t name_length,
         uint32_t index);
 
-void _wasm_format_functions_dump(tWasm_context *ctx);
+//void _wasm_format_functions_dump(tWasm_context *ctx);
 
 static bool parse_export_section(tWasm_context *ctx, const uint8_t *source, uint16_t length);
 
@@ -140,7 +138,7 @@ bool wasm_format_load(tWasm_context *ctx, const uint8_t *src, uint16_t length) {
 
     }
 
-    _wasm_format_functions_dump(ctx);
+//    _wasm_format_functions_dump(ctx);
 
     return true;
 }

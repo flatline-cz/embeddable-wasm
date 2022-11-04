@@ -6,7 +6,6 @@
 #include "instruction-decoder.h"
 #include "instruction-trace.h"
 #include "wa-utils.h"
-#include <stdio.h>
 
 #ifndef WASM_VALUE_STACK_SIZE
 #define WASM_VALUE_STACK_SIZE        256

@@ -2,7 +2,6 @@
 // Created by tumap on 10/25/22.
 //
 #include <string.h>
-#include <stdio.h>
 #include "wa-binding.h"
 #include "../execution/instruction-trace.h"
 #include "wa-utils.h"

@@ -2,7 +2,7 @@
 // Created by tumap on 10/21/22.
 //
 
-#include <stdlib.h>
+//#include <stdlib.h>
 #include "instruction-decoder.h"
 #include "instruction-trace.h"
 #include "wa-utils.h"

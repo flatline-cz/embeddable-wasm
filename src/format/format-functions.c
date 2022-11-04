@@ -3,7 +3,6 @@
 //
 #include <stdint.h>
 #include <stdbool.h>
-#include <stdio.h>
 #include "wa-types.h"
 #include "wa-utils.h"
 #include "wa-memory.h"
@@ -138,6 +137,7 @@ static inline bool map_value_type(uint8_t wasm_type, eWasm_value_type *dest) {
     return true;
 }
 
+/*
 static void _wasm_dump_value_type(eWasm_value_type type) {
     switch (type) {
         case WASM_NULL:
@@ -195,6 +195,7 @@ void _wasm_format_functions_dump(tWasm_context *ctx) {
     for (f = ctx->functions.function_list; f != NULL; f = f->next)
         _wasm_format_function_dump(&f->function);
 }
+ */
 
 
 static tWasm_function *_wasm_add_function(tWasm_context *ctx, uint16_t type_index) {
@@ -283,8 +284,9 @@ bool _wasm_format_parse_section_FUNCTION(
         }
         function->name.name = name;
         function->name.name_length = 6;
-        sprintf(name, "_f#%03d",
-                function->index);
+        // TODO:
+//        sprintf(name, "_f#%03d",
+//                function->index);
 
     }
 
