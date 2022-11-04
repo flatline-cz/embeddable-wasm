@@ -7,14 +7,21 @@
 #include "../execution/instruction-trace.h"
 #include "wa-utils.h"
 
+#if WASM_EXEC_TRACE
+#include <stdio.h>
+#define TRACE_CALL(f) printf("Function '%s' called\n", f->name.name);
+#else
+#define TRACE_CALL(f)
+#endif
+
 
 static bool check_type_stack2binding(eWasm_value_type from, eWasm_binding_type to);
 
 static bool check_type_binding2stack(eWasm_binding_type from, eWasm_value_type to);
 
-static tWasm_function *find_function(tWasm_context *ctx,
-                                     tWasm_function_call *call_ctx,
-                                     bool imported) {
+static tWasm_function *find_function_by_name(tWasm_context *ctx,
+                                             tWasm_function_call *call_ctx,
+                                             bool imported) {
 
     // scan all functions
     tWasm_function_list_item *item;
@@ -24,7 +31,7 @@ static tWasm_function *find_function(tWasm_context *ctx,
             continue;
 
         // compare name
-        if (strncmp(call_ctx->name, item->function.name.name, item->function.name.name_length) != 0)
+        if (strncmp(call_ctx->function.name, item->function.name.name, item->function.name.name_length) != 0)
             continue;
 
         // compare parameters
@@ -54,20 +61,20 @@ bool wasm_binding_bind_function(
         tWasm_binding *binding) {
 
     // find function
-    tWasm_function *function = find_function(ctx, &binding->call_ctx, true);
+    tWasm_function *function = find_function_by_name(ctx, &binding->call_ctx, true);
     if (function == NULL) {
         // function not imported
         return true;
     }
 
     if (function->import.binding != NULL) {
-        TRACE("Function already bound (name=%s)", binding->call_ctx.name)
+        TRACE("Function already bound (name=%s)", binding->call_ctx.function.name)
         return false;
     }
 
     function->import.binding = binding;
 
-    TRACE("Function bound (name=%s)", binding->call_ctx.name)
+    TRACE("Function bound (name=%s)", binding->call_ctx.function.name)
 
     return true;
 }
@@ -81,11 +88,12 @@ bool wasm_binding_call_function(tWasm_context *ctx, tWasm_function_call *call_ct
     }
 
     // find function
-    const tWasm_function *function = find_function(ctx, call_ctx, false);
+    const tWasm_function *function = _wasm_find_function(ctx, call_ctx->function.index);
     if (function == NULL) {
-        TRACE("Function not found (name=%s)", call_ctx->name);
+        TRACE("Function not found (idx=%d)", call_ctx->function.index);
         return false;
     }
+    TRACE_CALL(function)
 
     // initialize frame
     ctx->current_frame = &ctx->frame_stack.base->frame;

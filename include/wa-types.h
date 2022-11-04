@@ -99,7 +99,7 @@ typedef struct tagWasm_memory {
 typedef struct tagWasm_signature {
     eWasm_value_type return_type;
     unsigned param_count;
-    eWasm_value_type* params;
+    eWasm_value_type *params;
 } tWasm_signature;
 
 typedef struct tagWasm_entity_name {
@@ -108,7 +108,9 @@ typedef struct tagWasm_entity_name {
 } tWasm_entity_name;
 
 typedef enum enumWasm_binding_type {
-    WASM_BINDING_TYPE_NONE, WASM_BINDING_TYPE_U32, WASM_BINDING_TYPE_BYTE_ARRAY
+    WASM_BINDING_TYPE_NONE,
+    WASM_BINDING_TYPE_U32,
+    WASM_BINDING_TYPE_BYTE_ARRAY
 } eWasm_binding_type;
 
 typedef struct tagWasm_binding_value {
@@ -125,7 +127,10 @@ typedef struct tagWasm_binding_value {
 } tWasm_binding_value;
 
 typedef struct tagWasm_function_call {
-    const char *name;
+    union {
+        uint32_t index;
+        const char *name;
+    } function;
     unsigned param_count;
     tWasm_binding_value *params;
     tWasm_binding_value return_value;
@@ -143,7 +148,7 @@ typedef struct tagWasm_function {
     uint16_t index;
     bool imported;
     bool exported;
-    tWasm_signature* signature;
+    tWasm_signature *signature;
     union {
         struct {
             // code
