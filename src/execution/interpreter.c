@@ -74,32 +74,3 @@ bool wasm_interpreter_do_work(tWasm_context *const ctx) {
     return true;
 }
 
-
-
-//bool wasm_interpreter_call_function(tWasm_context *const ctx, const uint16_t function_index) {
-//    // interpreter idle?
-//    if (ctx->current_frame != NULL) {
-//        TRACE("Can't call function, execution in progress")
-//        return false;
-//    }
-//
-//    // find function
-//    const tWasm_function *function = _wasm_find_function(ctx, function_index);
-//    if (!function) {
-//        TRACE("Function (id=%d) not found", function_index)
-//        return false;
-//    }
-//
-//    // initialize frame
-//    ctx->current_frame = &ctx->frame_stack.base->frame;
-//    ctx->frame_stack.top++;
-//    ctx->current_frame->caller_frame = NULL;
-//    ctx->current_frame->locals_count = 0;  // FIXME
-//    ctx->current_frame->value_stack.base = ctx->value_stack.base;
-//    ctx->current_frame->value_stack.size = ctx->value_stack.size - ctx->value_stack.top;
-//    ctx->current_frame->value_stack.top = 0;
-//    ctx->current_frame->function = function;
-//    ctx->current_frame->instruction_counter = 0;
-//
-//    return true;
-//}

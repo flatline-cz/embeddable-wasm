@@ -284,10 +284,13 @@ bool _wasm_format_parse_section_FUNCTION(
         }
         function->name.name = name;
         function->name.name_length = 6;
-        // TODO:
-//        sprintf(name, "_f#%03d",
-//                function->index);
-
+        name[0]='_';
+        name[1]='f';
+        name[2]='#';
+        name[3]=(char)('0'+(function->index/100)%10);
+        name[4]=(char)('0'+(function->index/10)%10);
+        name[5]=(char)('0'+function->index%10);
+        name[6]=0;
     }
 
     return true;
