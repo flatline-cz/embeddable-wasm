@@ -6,12 +6,7 @@
 #include "wa-memory.h"
 #include "wa-types.h"
 #include "wa-utils.h"
-
-#ifdef WASM_FORMAT_TRACE
-#define TRACE(...) printf("WASM Format:  "); printf(__VA_ARGS__); printf("\n");
-#else
-#define TRACE(...)
-#endif
+#include "format-trace.h"
 
 
 bool _wasm_format_parse_section_TYPE(
@@ -50,12 +45,12 @@ bool wasm_format_load(tWasm_context *ctx, const uint8_t *src, uint16_t length) {
 
     // check magic number & version
     if (length < 8) {
-        TRACE("Invalid length(%d)", length)
+        FAILURE("Invalid length(%d)", length)
         return false;
     }
     if (src[0] != 0x00 || src[1] != 0x61 || src[2] != 0x73 || src[3] != 0x6d ||
         src[4] != 0x01 || src[5] != 0x00 || src[6] != 0x00 || src[7] != 0x00) {
-        TRACE("Invalid header")
+        FAILURE("Invalid header")
         return false;
     }
     src += 8;
@@ -65,7 +60,7 @@ bool wasm_format_load(tWasm_context *ctx, const uint8_t *src, uint16_t length) {
     while (length != 0) {
         // extract section type
         if (length < 1) {
-            TRACE("Invalid structure (unable to extract section type)")
+            FAILURE("Invalid structure (unable to extract section type)")
             return false;
         }
         uint8_t section_type = *(src++);
@@ -75,7 +70,7 @@ bool wasm_format_load(tWasm_context *ctx, const uint8_t *src, uint16_t length) {
         uint32_t section_length;
         uint16_t consumed;
         if (!_wasm_extract_u32(src, length, &consumed, &section_length)) {
-            TRACE("Invalid structure (unable to extract section length)")
+            FAILURE("Invalid structure (unable to extract section length)")
             return false;
         }
         src += consumed;
@@ -83,7 +78,7 @@ bool wasm_format_load(tWasm_context *ctx, const uint8_t *src, uint16_t length) {
 
         // validate section length
         if (section_length > length) {
-            TRACE("Invalid structure (inconsistent section length)")
+            FAILURE("Invalid structure (inconsistent section length)")
             return false;
         }
 
@@ -127,7 +122,7 @@ bool wasm_format_load(tWasm_context *ctx, const uint8_t *src, uint16_t length) {
                 break;
 
             default: {
-//                TRACE("Unknown section (type %d, length %d)", section_type, section_length);
+                TRACE("Unknown section (type %d, length %d)", section_type, section_length);
 //                return false;
             }
         }
@@ -158,7 +153,7 @@ static bool parse_import_section(tWasm_context *const ctx, const uint8_t *source
     // extract number of imports
     uint32_t number_of_imports;
     if (!_wasm_extract_u32(source, length, &consumed, &number_of_imports)) {
-        TRACE("Invalid structure (unable to extract number of imported entities)")
+        FAILURE("Invalid structure (unable to extract number of imported entities)")
         return false;
     }
     source += consumed;
@@ -169,7 +164,7 @@ static bool parse_import_section(tWasm_context *const ctx, const uint8_t *source
         // get module name length
         uint32_t module_name_length;
         if (!_wasm_extract_u32(source, length, &consumed, &module_name_length)) {
-            TRACE("Invalid structure (unable to extract imported entity module name length)")
+            FAILURE("Invalid structure (unable to extract imported entity module name length)")
             return false;
         }
         source += consumed;
@@ -180,7 +175,7 @@ static bool parse_import_section(tWasm_context *const ctx, const uint8_t *source
         // get name length
         uint32_t name_length;
         if (!_wasm_extract_u32(source, length, &consumed, &name_length)) {
-            TRACE("Invalid structure (unable to extract imported entity name length)")
+            FAILURE("Invalid structure (unable to extract imported entity name length)")
             return false;
         }
         source += consumed;
@@ -191,24 +186,50 @@ static bool parse_import_section(tWasm_context *const ctx, const uint8_t *source
 
         // get type
         if (length < 2) {
-            TRACE("Invalid structure (unable to extract imported entity type)")
+            FAILURE("Invalid structure (unable to extract imported entity type)")
             return false;
         }
         uint8_t type = *source;
         source++;
         length--;
 
-        // get index
-        uint32_t index;
-        if (!_wasm_extract_u32(source, length, &consumed, &index)) {
-            TRACE("Invalid structure (unable to extract imported entity index)")
-            return false;
+        // is memory?
+        if (type == 0x02) {
+            if (!length) {
+                FAILURE("Invalid file structure")
+                return false;
+            }
+            uint8_t lim_type = *source;
+            source++;
+            length--;
+            uint32_t dummy;
+            if (!_wasm_extract_u32(source, length, &consumed, &dummy)) {
+                FAILURE("Invalid file structure")
+                return false;
+            }
+            source += consumed;
+            length -= consumed;
+            if (lim_type == 0x01) {
+                if (!_wasm_extract_u32(source, length, &consumed, &dummy)) {
+                    FAILURE("Invalid file structure")
+                    return false;
+                }
+                source += consumed;
+                length -= consumed;
+            }
+            continue;
         }
-        source += consumed;
-        length -= consumed;
 
         // is function?
         if (type == 0x00) {
+            // get index
+            uint32_t index;
+            if (!_wasm_extract_u32(source, length, &consumed, &index)) {
+                FAILURE("Invalid structure (unable to extract imported entity index)")
+                return false;
+            }
+            source += consumed;
+            length -= consumed;
 
             if (!_wasm_format_parse_section_IMPORT_function(
                     ctx, (const char *) name_start, name_length, index)) {
@@ -219,6 +240,7 @@ static bool parse_import_section(tWasm_context *const ctx, const uint8_t *source
 
         // TODO: decode type
         TRACE("NOT-SUPPORTED: import type %d", type)
+        break;
     }
 
     return true;
@@ -230,7 +252,7 @@ static bool parse_export_section(tWasm_context *const ctx, const uint8_t *source
     // extract number of exports
     uint32_t number_of_exports;
     if (!_wasm_extract_u32(source, length, &consumed, &number_of_exports)) {
-        TRACE("Invalid structure (unable to extract number of exported entities)")
+        FAILURE("Invalid structure (unable to extract number of exported entities)")
         return false;
     }
     source += consumed;
@@ -242,7 +264,7 @@ static bool parse_export_section(tWasm_context *const ctx, const uint8_t *source
         // get name length
         uint32_t name_length;
         if (!_wasm_extract_u32(source, length, &consumed, &name_length)) {
-            TRACE("Invalid structure (unable to extract exported entity name length)")
+            FAILURE("Invalid structure (unable to extract exported entity name length)")
             return false;
         }
         source += consumed;
@@ -253,7 +275,7 @@ static bool parse_export_section(tWasm_context *const ctx, const uint8_t *source
 
         // get type
         if (length < 2) {
-            TRACE("Invalid structure (unable to extract exported entity type)")
+            FAILURE("Invalid structure (unable to extract exported entity type)")
             return false;
         }
         uint8_t type = *source;
@@ -263,7 +285,7 @@ static bool parse_export_section(tWasm_context *const ctx, const uint8_t *source
         // get index
         uint32_t index;
         if (!_wasm_extract_u32(source, length, &consumed, &index)) {
-            TRACE("Invalid structure (unable to extract exported entity index)")
+            FAILURE("Invalid structure (unable to extract exported entity index)")
             return false;
         }
         source += consumed;
@@ -279,7 +301,7 @@ static bool parse_export_section(tWasm_context *const ctx, const uint8_t *source
         }
 
         // TODO: decode type
-//        TRACE("NOT-SUPPORTED: export type %d", type)
+        TRACE("NOT-SUPPORTED: export type %d", type)
     }
     return true;
 }

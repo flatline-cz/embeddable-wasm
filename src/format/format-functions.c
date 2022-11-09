@@ -6,6 +6,7 @@
 #include "wa-types.h"
 #include "wa-utils.h"
 #include "wa-memory.h"
+#include "format-trace.h"
 
 
 static uint32_t signature_count;
@@ -24,12 +25,14 @@ static inline bool map_value_type(uint8_t wasm_type, eWasm_value_type *dest);
 bool _wasm_format_parse_section_TYPE(
         tWasm_context *ctx,
         uint8_t *src, unsigned section_length) {
+    TRACE("Section TYPE")
 
     uint16_t consumed;
 
     // get number of signatures
     if (!_wasm_extract_u32(src, section_length,
                            &consumed, &signature_count)) {
+        FAILURE("Unable to extract number of signatures")
         return false;
     }
     src += consumed;
@@ -47,6 +50,7 @@ bool _wasm_format_parse_section_TYPE(
         // get number of parameters
         uint32_t param_count;
         if (!_wasm_extract_u32(src, section_length, &consumed, &param_count)) {
+            FAILURE("Unable to extract number of signature parameters")
             return false;
         }
         src += consumed;
@@ -56,6 +60,7 @@ bool _wasm_format_parse_section_TYPE(
         tWasm_signature_item *signature_item = wasm_memory_system_alloc(
                 &ctx->memory, sizeof(tWasm_signature_item));
         if (signature_item == NULL) {
+            FAILURE("Unable to allocate memory for signature")
             return false;
         }
         signature_item->index = i;
@@ -70,6 +75,7 @@ bool _wasm_format_parse_section_TYPE(
             signature_item->signature.params = wasm_memory_system_alloc(
                     &ctx->memory, param_count * sizeof(eWasm_value_type));
             if (signature_item->signature.params == NULL) {
+                FAILURE("Unable to allocate memory for signature parameter")
                 return false;
             }
         }
@@ -77,9 +83,12 @@ bool _wasm_format_parse_section_TYPE(
         // process parameter types
         unsigned j;
         for (j = 0; j < signature_item->signature.param_count; j++) {
-            if (!section_length)
+            if (!section_length) {
+                FAILURE("Invalid signature parameters")
                 return false;
+            }
             if (!map_value_type(*src, signature_item->signature.params + j)) {
+                FAILURE("Unable to map signature parameter type")
                 return false;
             }
             src++;
@@ -89,21 +98,25 @@ bool _wasm_format_parse_section_TYPE(
         // get number of results
         uint32_t result_count;
         if (!_wasm_extract_u32(src, section_length, &consumed, &result_count)) {
+            FAILURE("Invalid signature return type")
             return false;
         }
         src += consumed;
         section_length -= consumed;
 
         if (result_count > 1) {
+            FAILURE("Only single value return type is supported")
             return false;
         }
         if (result_count == 1) {
             if (section_length < 2 || *src != 0x60) {
+                FAILURE("Invalid signature return type")
                 return false;
             }
             src++;
             section_length -= 2;
             if (!map_value_type(*src, &signature_item->signature.return_type)) {
+                FAILURE("Unable to map signature return type")
                 return false;
             }
             src++;
@@ -203,6 +216,7 @@ static tWasm_function *_wasm_add_function(tWasm_context *ctx, uint16_t type_inde
     tWasm_function_list_item *function_item = wasm_memory_system_alloc(
             &ctx->memory, sizeof(tWasm_function_list_item));
     if (function_item == NULL) {
+        FAILURE("Unable to allocate memory for function")
         return NULL;
     }
     function_item->next = NULL;
@@ -230,6 +244,8 @@ bool _wasm_format_parse_section_IMPORT_function(
         const char *name, uint8_t name_length,
         uint32_t index) {
 
+    TRACE("Section IMPORT (function)")
+
     // create function
     tWasm_function *function = _wasm_add_function(ctx, index);
     if (function == NULL) {
@@ -250,6 +266,8 @@ bool _wasm_format_parse_section_IMPORT_function(
 bool _wasm_format_parse_section_FUNCTION(
         tWasm_context *ctx,
         const uint8_t *src, unsigned section_length) {
+    TRACE("Section FUNCTIONS")
+
     uint16_t consumed;
 
     // get function count
@@ -301,9 +319,12 @@ bool _wasm_format_parse_section_EXPORT_function(
         const char *name, uint8_t name_length,
         uint32_t index) {
 
+    TRACE("Section EXPORT (function)")
+
     // find function
     tWasm_function *function = (tWasm_function *) _wasm_find_function(ctx, index);
     if (function == NULL) {
+        FAILURE("Unable to find function for export (index=%d)", index)
         return false;
     }
 
@@ -317,6 +338,7 @@ bool _wasm_format_parse_section_EXPORT_function(
 bool _wasm_format_parse_section_CODE(
         tWasm_context *ctx,
         const uint8_t *src, unsigned section_length) {
+    TRACE("Section CODE")
 
     uint16_t consumed;
 

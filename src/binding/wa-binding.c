@@ -7,8 +7,10 @@
 #include "wa-utils.h"
 
 #if WASM_EXEC_TRACE
+
 #include <stdio.h>
-#define TRACE_CALL(f) printf("Function '%s' called\n", f->name.name);
+
+#define TRACE_CALL(f) printf("Function '"); fwrite(f->name.name, 1, f->name.name_length, stdout); printf("' called\n");
 #else
 #define TRACE_CALL(f)
 #endif
@@ -92,7 +94,7 @@ bool wasm_binding_call_function(tWasm_context *ctx, tWasm_function_call *call_ct
         TRACE("Function not found (idx=%d)", call_ctx->function.index);
         return false;
     }
-    TRACE_CALL(function)
+//    TRACE_CALL(function)
 
     // initialize frame
     ctx->current_frame = &ctx->frame_stack.base->frame;
@@ -103,7 +105,6 @@ bool wasm_binding_call_function(tWasm_context *ctx, tWasm_function_call *call_ct
     ctx->current_frame->value_stack.base = ctx->value_stack.base;
     uint16_t size = ctx->value_stack.size - ctx->value_stack.top;
     uint16_t count = function->implementation.locals_count;
-    count += function->signature->param_count;
     ctx->current_frame->value_stack.top = count;
     size -= count;
     ctx->current_frame->value_stack.size = size;
@@ -111,6 +112,20 @@ bool wasm_binding_call_function(tWasm_context *ctx, tWasm_function_call *call_ct
     ctx->current_frame->instruction_counter = 0;
 
     // TODO: copy parameters
+    int i;
+    for (i = 0; i < call_ctx->param_count; i++) {
+        switch (call_ctx->params[i].type) {
+            case WASM_BINDING_TYPE_NONE:
+                ctx->current_frame->value_stack.base[i].type = WASM_NULL;
+                break;
+            case WASM_BINDING_TYPE_U32:
+                ctx->current_frame->value_stack.base[i].type = WASM_I32;
+                ctx->current_frame->value_stack.base[i].i32 = (int32_t) *(call_ctx->params[i].u32.value);
+                break;
+            default:
+                return false;
+        }
+    }
 
     return true;
 
